@@ -33,7 +33,7 @@ If implementing the second approach is difficult, but you want to verify the cor
 
 Good luck!
 
-### ** Output Interface Definition**
+### **Output Interface Definition**
 
 - **`result_by_shift_o`**: A 16-bit result obtained for the first approach.
 - **`result_by_borders_o`**: A 16-bit result obtained for the second approach.

@@ -1,0 +1,46 @@
+# Byte-compiled Python files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# C extensions
+*.so
+
+# Temporary files
+*.tmp
+*.log
+*.out
+*.vcd
+*.fst
+*.vvp
+*.ghw
+
+# Simulation build directories
+sim_build/
+obj_dir/
+
+# Results files
+results.xml
+*.pstat
+*.profile
+callgraph.svg
+
+# Verilator-specific files
+*.mk
+*.d
+*.o
+*.a
+
+# Editor and IDE files
+*.swp
+*.swo
+*.bak
+*~
+.vscode/
+.idea/
+*.iml
+
+# OS-generated files
+.DS_Store
+Thumbs.db

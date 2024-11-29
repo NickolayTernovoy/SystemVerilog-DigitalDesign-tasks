@@ -8,7 +8,7 @@ module rol_tb;
     forever #5 clk = ~clk; // 10ns period clock
   end
 
-  // Param declaration 
+  // Param declaration
   localparam SIZE = 16;
   localparam SHAMT_SIZE = $clog2(SIZE);
   localparam N = 2**SIZE;

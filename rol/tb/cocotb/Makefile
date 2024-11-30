@@ -1,4 +1,4 @@
-ыыыTOPLEVEL_LANG ?= verilog
+TOPLEVEL_LANG ?= verilog
 SIM ?= icarus
 
 PWD = $(shell pwd)

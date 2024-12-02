@@ -29,8 +29,8 @@ module float_to_fix #(
     // Check if the number is normalized (non-zero exponent)
     always_comb normal_bit = |exp;
 
-    // If the number is denormalized, the normalized exponent is zero
-    // 1 subtraction for handling hidden mantissa bit
+    // If the number is normalized, subtract 1 because the maximum exponent value 
+    // is reserved for special cases (infinity and NaN)
     always_comb norm_exp = normal_bit ? exp - 1'b1 : '0;
 
     // Add the hidden '1' bit for normalized numbers or keep denormalized mantissa as-is

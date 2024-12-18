@@ -21,15 +21,15 @@ module float_to_fix #(
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Extract the sign, exponent, and mantissa from the input
     always_comb begin
-        sign     = float_point_operand_i[15   ]; // Sign bit
-        exp      = float_point_operand_i[14:10]; // Exponent (5 bits)
-        mantissa = float_point_operand_i[9:0  ]; // Mantissa (10 bits)
+        sign     = float_point_operand_i[EXP_MSB_POS + 1              ]; // Sign bit
+        exp      = float_point_operand_i[EXP_MSB_POS - 1 : EXP_LSB_POS]; // Exponent (5 bits)
+        mantissa = float_point_operand_i[EXP_LSB_POS - 1 : 0          ]; // Mantissa (10 bits)
     end
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Check if the number is normalized (non-zero exponent)
     always_comb normal_bit = |exp;
 
-    // If the number is normalized, subtract 1 because the maximum exponent value 
+    // If the number is normalized, subtract 1 because the maximum exponent value
     // is reserved for special cases (infinity and NaN)
     always_comb norm_exp = normal_bit ? exp - 1'b1 : '0;
 

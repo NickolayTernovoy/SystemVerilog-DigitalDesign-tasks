@@ -7,7 +7,10 @@ module float_to_fix #(
     parameter FIXED_OP_WIDTH = 40  // Width of the fixed-point output
 )(
     input  wire logic [FLOAT_OP_WIDTH-1:0] float_point_operand_i, // Input floating-point operand
-    output var  logic [FIXED_OP_WIDTH-1:0] fixed_point_value_o    // Output fixed-point value
+    output var  logic [FIXED_OP_WIDTH-1:0] fixed_point_value_o  , // Output fixed-point value
+    output var  logic                      nan_flag_o           , // Output NaN flag
+    output var  logic                      snan_flag_o          , // Output sNaN flag
+    output var  logic                      inf_flag_o             // Output +/-inf flag
 );
     // Declare local signals
     logic                                   sign                      ; // Sign bit of the floating-point number
@@ -42,5 +45,15 @@ module float_to_fix #(
     // 2's complement handler
     always_comb fixed_point_value_o = sign ? FIXED_OP_WIDTH'(~fixed_point_value_2s_cmpl + 1'b1) :
                                              FIXED_OP_WIDTH'( fixed_point_value_2s_cmpl)        ;
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Special Cases detection
+    // qNaN: Exponent is all 1's, MSB of mantissa is 1
+    always_comb nan_flag_o = (&exp) & mantissa[EXP_LSB_POS-1];
+
+    // sNaN: Exponent is all 1's, MSB of mantissa is 0, and at least one bit in mantissa is non-zero
+    always_comb snan_flag_o = (&exp) & ~mantissa[EXP_LSB_POS-1] & (|mantissa[EXP_LSB_POS-2:0]);
+
+    // Infinity: Exponent is all 1's, and all mantissa bits are 0
+    always_comb inf_flag_o = (&exp) & ~(|mantissa);
 
 endmodule

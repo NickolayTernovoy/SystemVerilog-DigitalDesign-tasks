@@ -1,0 +1,42 @@
+name: Python Virtual Environment and Cocotb Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  setup-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set Up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install Icarus Verilog
+      run: sudo apt update && sudo apt install -y iverilog
+
+    - name: Verify Python Version
+      run: python3 --version
+
+    - name: Create Virtual Environment
+      run: python3 -m venv venv_cocotb
+
+    - name: Activate Virtual Environment, Install Dependencies, Run Make in Cocotb Directory with Logging
+      run: |
+        pwd
+        source venv_cocotb/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        cd rol/tb/cocotb/
+        make | tee make_output.log
+        cat make_output.log
+

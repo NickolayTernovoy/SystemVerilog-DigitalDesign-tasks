@@ -23,7 +23,7 @@ In this sequence, each number is obtained by performing a left rotate (ROL) oper
 The rotation operation can be solved in two ways:
 
 - **Approach 1**: Use smaller shifters for both left and right shifts, then combine the results using a logical operation.
-- **Approach 2**: se a wider shifter, which directly performs the rotate.
+- **Approach 2**: Use a wider shifter, which directly performs the rotate.
 
 Your task is to implement **both approaches**.
 

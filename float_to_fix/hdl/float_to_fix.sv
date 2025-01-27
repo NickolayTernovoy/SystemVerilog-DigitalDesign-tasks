@@ -1,14 +1,14 @@
 `timescale 1ns / 1ps
-
+`define SVA_ENABLE 1
 module float_to_fix #(
     parameter EXP_MSB_POS    = 14, // MSB in exponent filed
     parameter EXP_LSB_POS    = 10, // LSB in exponent field
     parameter FLOAT_OP_WIDTH = 16, // Width of the floating-point input
-    parameter FIXED_OP_WIDTH = 40  // Width of the fixed-point output
+    parameter FIXED_OP_WIDTH = 80  // Width of the fixed-point output
 )(
 `ifdef SVA_ENABLE
-    input  wire logic                      clk_i                ,
-    input  wire logic                      rst_n_i              ,
+    input  wire logic                      clk_i                , // Clock input
+    input  wire logic                      rst_n_i              , // Active-low reset input
 `endif
     input  wire logic [FLOAT_OP_WIDTH-1:0] float_point_operand_i, // Input floating-point operand
     output var  logic [FIXED_OP_WIDTH-1:0] fixed_point_value_o  , // Output fixed-point value
@@ -29,7 +29,7 @@ module float_to_fix #(
     // Extract the sign, exponent, and mantissa from the input
     always_comb begin
         sign     = float_point_operand_i[EXP_MSB_POS + 1              ]; // Sign bit
-        exp      = float_point_operand_i[EXP_MSB_POS - 1 : EXP_LSB_POS]; // Exponent (5 bits)
+        exp      = float_point_operand_i[EXP_MSB_POS     : EXP_LSB_POS]; // Exponent (5 bits)
         mantissa = float_point_operand_i[EXP_LSB_POS - 1 : 0          ]; // Mantissa (10 bits)
     end
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -46,8 +46,7 @@ module float_to_fix #(
     // Check if the number is normalized (non-zero exponent)
     always_comb normal_bit = |exp;
 
-    // If the number is normalized, subtract 1 because the maximum exponent value
-    // is reserved for special cases (infinity and NaN)
+    // Here, we subtract 1 from the bias (BIAS - 1) to account for the hidden bit.
     always_comb norm_exp = normal_bit ? exp - 1'b1 : '0;
 
     // Add the hidden '1' bit for normalized numbers or keep denormalized mantissa as-is
@@ -55,7 +54,7 @@ module float_to_fix #(
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Compute the fixed-point value by shifting the signed mantissa by the normalized exponent
-    always_comb fixed_point_value_2s_cmpl = {norm_mantissa} << norm_exp;
+    always_comb fixed_point_value_2s_cmpl = FIXED_OP_WIDTH'({norm_mantissa} << norm_exp);
     // 2's complement handler
     always_comb fixed_point_value_o = sign ? FIXED_OP_WIDTH'(~fixed_point_value_2s_cmpl + 1'b1) :
                                              FIXED_OP_WIDTH'( fixed_point_value_2s_cmpl)        ;
@@ -72,6 +71,11 @@ module float_to_fix #(
     SVA_NAN_AND_INF_EXCLUSIVE: assert property (
         @(negedge clk_i) disable iff (~rst_n_i)
         (nan_flag_o |-> ~inf_flag_o)
+    ) else $error("Error: NaN and +/-Infinity cannot be asserted simultaneously!");
+
+    SVA_INF_AND_NaN_EXCLUSIVE: assert property (
+        @(negedge clk_i) disable iff (~rst_n_i)
+        (inf_flag_o |-> ~nan_flag_o)
     ) else $error("Error: NaN and +/-Infinity cannot be asserted simultaneously!");
 
 `endif

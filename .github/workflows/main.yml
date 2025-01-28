@@ -39,4 +39,3 @@ jobs:
         cd rol/tb/cocotb/
         make | tee make_output.log
         cat make_output.log
-

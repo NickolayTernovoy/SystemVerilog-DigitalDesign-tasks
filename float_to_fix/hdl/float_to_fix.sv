@@ -46,7 +46,8 @@ module float_to_fix #(
     // Check if the number is normalized (non-zero exponent)
     always_comb normal_bit = |exp;
 
-    // Here, we subtract 1 from the bias (BIAS - 1) to account for the hidden bit.
+    // Adjust exponent for normalized numbers by subtracting 1 to account for the hidden bit position,
+    // or return 0 for denormalized numbers
     always_comb norm_exp = normal_bit ? exp - 1'b1 : '0;
 
     // Add the hidden '1' bit for normalized numbers or keep denormalized mantissa as-is

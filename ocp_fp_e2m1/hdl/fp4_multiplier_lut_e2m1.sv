@@ -7,7 +7,16 @@ module fp4_multiplier_lut_e2m1 (
     // Local signals
     logic        result_sign;  // Result sign (XOR of the operand sign bits)
     logic [2:0]  magnitude;    // Result magnitude
-
+    // FP4 encoding
+    // FP4 (E2M1) values (bit pattern -> value):
+    // {sign, 3'b000} ->  {sign, 0.0}
+    // {sign, 3'b001} ->  {sign, 0.5}
+    // {sign, 3'b010} ->  {sign, 1.0}
+    // {sign, 3'b011} ->  {sign, 1.5}
+    // {sign, 3'b100} ->  {sign, 2.0}
+    // {sign, 3'b101} ->  {sign, 3.0}
+    // {sign, 3'b110} ->  {sign, 4.0}
+    // {sign, 3'b111} ->  {sign, 6.0}
     /////////////////////////////////////////////////////////////////////////////////
     // Sign handling: compute the result sign as the XOR of the operand sign bits
     always_comb result_sign = operand_a[3] ^ operand_b[3];
@@ -20,61 +29,46 @@ module fp4_multiplier_lut_e2m1 (
             // Subnormal × Subnormal
             {3'b001, 3'b001}:
                 magnitude = 3'b001; // 0.5 × 0.5 = 0.5
-
             // Subnormal × Normal
             {3'b001, 3'b010},
             {3'b010, 3'b001}:
                 magnitude = 3'b001; // 0.5 × 1.0 = 0.5
-
             {3'b001, 3'b011},
             {3'b011, 3'b001}:
                 magnitude = 3'b010; // 0.5 × 1.5 = 1.0
-
             {3'b001, 3'b110},
             {3'b110, 3'b001}:
                 magnitude = 3'b011; // 0.5 × 3.0 = 1.5
-
             {3'b001, 3'b111},
             {3'b111, 3'b001}:
                 magnitude = 3'b110; // 0.5 × 6.0 = 3.0
-
             // Normal × Normal
             {3'b010, 3'b010}:
                 magnitude = 3'b010; // 1.0 × 1.0 = 1.0
-
             {3'b010, 3'b011},
             {3'b011, 3'b010}:
                 magnitude = 3'b011; // 1.0 × 1.5 = 1.5
-
             {3'b010, 3'b110},
             {3'b110, 3'b010}:
                 magnitude = 3'b110; // 1.0 × 3.0 = 3.0
-
             {3'b010, 3'b111},
             {3'b111, 3'b010}:
                 magnitude = 3'b111; // 1.0 × 6.0 = 6.0
-
             {3'b011, 3'b011}:
                 magnitude = 3'b110; // 1.5 × 1.5 = 3.0
-
             {3'b011, 3'b110},
             {3'b110, 3'b011}:
                 magnitude = 3'b111; // 1.5 × 3.0 = 6.0
-
             {3'b011, 3'b111},
             {3'b111, 3'b011}:
                 magnitude = 3'b111; // 1.5 × 6.0 = 6.0 (saturated)
-
             {3'b110, 3'b110}:
                 magnitude = 3'b111; // 3.0 × 3.0 = 6.0 (saturated)
-
             {3'b110, 3'b111},
             {3'b111, 3'b110}:
                 magnitude = 3'b111; // 3.0 × 6.0 = 6.0 (saturated)
-
             {3'b111, 3'b111}:
                 magnitude = 3'b111; // 6.0 × 6.0 = 6.0 (saturated)
-
             // All other cases (including zeros) return 0
             default:
                 magnitude = 3'b000;
